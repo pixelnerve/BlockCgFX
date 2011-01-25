@@ -1,0 +1,29 @@
+Block CgFX
+------------
+Load CgFX effect files easily in to your applications
+
+
+
+Example:
+
+V::CGFXManager cgManager;
+V::ShaderCGFXRef shader0;
+
+void setup()
+{
+	cgManager.init();
+	shader0 = cgManager.loadEffectFromFile( "data/SSAOgame.cgfx" );
+}
+
+
+void draw()
+{
+	shader0.enable();
+	shader0.setTextureParameter( "DepthSampler", depthTex.getId() );
+	shader0.setParameter1f( "foo", 1 );
+	shader0.setTechnique( "technique_name" );
+	shader0.setPass();
+	renderGeometry();
+	shader0.resetPass();
+	shader0.disable();
+}
