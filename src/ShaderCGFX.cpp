@@ -60,18 +60,13 @@ namespace V
 
 	ShaderCGFX::Obj::~Obj()
 	{
-		if( mOwnsData )
+		//if( mOwnsData )
 		{
 			if( _effect != NULL ) 
 			{
 				cgDestroyEffect( _effect );
 				_effect = NULL;
 			}
-			//if( _context != NULL ) 
-			//{
-			//	cgDestroyContext( _context );
-			//	_context = NULL;
-			//}
 
 			_currTechnique = NULL;
 			_currPass = NULL;
@@ -79,49 +74,19 @@ namespace V
 	}
 
 
-	ShaderCGFX::ShaderCGFX( )
+	ShaderCGFX::ShaderCGFX( ) 
 		: mObj( new Obj( true ) )
 	{
-		//mObj->_context = context;
-
 		//_type = CGFX;
 		_name = "null";
-
-		//mObj->_context = cgCreateContext();
-		//checkCgError();
-		////int error = cgGetError();        
-		////VLogger.getSingleton().log( "(ShaderCGFX)  " + cgGetErrorString(error) ); 
-		////VLogger.getSingleton().log( "(ShaderCGFX)  " + cgGetLastListing(_context) ); 
-
-		//cgGLRegisterStates( mObj->_context );
-		//cgSetParameterSettingMode( mObj->_context, CG_DEFERRED_PARAMETER_SETTING );
-
-		//cgGLSetManageTextureParameters( mObj->_context, true );
 	}
 
 
 	ShaderCGFX::ShaderCGFX( CGcontext context, const std::string& filename )
 		: mObj( new Obj( true ) )
 	{
-		//mObj->_context = context;
-
 		//_type = CGFX;
 		_name = filename;
-
-		//mObj->_context = cgCreateContext();
-		//checkCgError();
-		////CGerror error = cgGetError();        
-		////std::stringstream ss;
-		////ss << "[ShaderCGFX]  '" << name << "' : " << cgGetErrorString(error) << std::endl;
-		////DEBUG_MESSAGE( ss.str().c_str() ); 
-		////std::stringstream ss2;
-		////ss2 << "(ShaderCGFX)  " << cgGetLastListing(mObj->_context) << std::endl;
-		////DEBUG_MESSAGE( ss2.str().c_str() ); 
-
-		//cgGLRegisterStates( mObj->_context );
-		//cgSetParameterSettingMode( mObj->_context, CG_DEFERRED_PARAMETER_SETTING );
-
-		//cgGLSetManageTextureParameters( mObj->_context, true );
 
 		this->load( context, filename );
 	}
@@ -274,12 +239,14 @@ namespace V
 
 	void ShaderCGFX::enable()
 	{
+		// empty
 	}
 
 
 
 	void ShaderCGFX::disable()
 	{
+		// empty
 	}
 
 
@@ -394,7 +361,6 @@ namespace V
 		mObj->_currTechnique = cgGetNamedTechnique( mObj->_effect, name.c_str() );    
 		if( mObj->_currTechnique == NULL )
 		{
-			//System.err.println( "(ShaderCGFX)  technique '" + name + "' is NULL" );
 			return NULL;
 		}
 
@@ -406,16 +372,18 @@ namespace V
 
 
 
+	int32_t ShaderCGFX::getArrayDimension( const std::string& param )
+	{
+		CGparameter p = cgGetNamedEffectParameter( mObj->_effect, param.c_str() );
+		return cgGetArrayDimension( p );
+	}
+
+
 	void ShaderCGFX::setTextureParameter( const std::string& param, boost::int32_t val )
 	{
 		  CGparameter p = NULL;
 		  p = cgGetNamedEffectParameter( mObj->_effect, param.c_str() );
-		  if( p != NULL ) cgGLSetTextureParameter( p, val );
-		  else
-		  {
-				//System.err.println( "(ShaderCGFX)  Cant find texture parameter" );
-			  return;
-		  }
+		  cgGLSetTextureParameter( p, val );
 		  cgSetSamplerState( p );
 	}
 
@@ -423,49 +391,42 @@ namespace V
 	{
 		CGparameter p = NULL;
 		p = cgGetNamedEffectParameter( mObj->_effect, param.c_str() );
-		if( p != NULL ) cgSetParameter1d( p, x );
-		//else System.err.println( "(ShaderCGFX)  param1d is NULL" ); 
+		cgSetParameter1d( p, x );
 	}
 
 	void ShaderCGFX::setParameter1f( const std::string& param, float x )
 	{
 		CGparameter p = NULL;
 		p = cgGetNamedEffectParameter( mObj->_effect, param.c_str() );
-		if( p != NULL ) cgSetParameter1f( p, x );
-		//else System.err.println( "(ShaderCGFX)  param1f is NULL" ); 
+		cgSetParameter1f( p, x );
 	}
 
 	void ShaderCGFX::setParameter1fv( const std::string& param, float* v )
 	{
 		CGparameter p = NULL;
 		p = cgGetNamedEffectParameter( mObj->_effect, param.c_str() );
-		if( p != NULL ) cgGLSetParameterArray1f( p, 0, sizeof(v), v );
-		//else System.err.println( "(ShaderCGFX)  param3fv is NULL" ); 
+		cgGLSetParameterArray1f( p, 0, sizeof(v), v );
 	}
 
 	void ShaderCGFX::setParameter1i( const std::string& param, int x )
 	{
 		CGparameter p = NULL;
 		p = cgGetNamedEffectParameter( mObj->_effect, param.c_str() );
-		if( p != NULL ) cgSetParameter1i( p, x );
-		//else System.err.println( "(ShaderCGFX)  param1f is NULL" ); 
+		cgSetParameter1i( p, x );
 	}
 
 	void ShaderCGFX::setParameter2f( const std::string& param, float x, float y )
 	{
 		CGparameter p = NULL;
 		p = cgGetNamedEffectParameter( mObj->_effect, param.c_str() );
-		if( p != NULL ) 
-			cgSetParameter2f( p, x, y );
-		//else System.err.println( "(ShaderCGFX)  param2f is NULL" ); 
+		cgSetParameter2f( p, x, y );
 	}
 
 	void ShaderCGFX::setParameter2fv( const std::string& param, float* v )
 	{
 		CGparameter p = NULL;
 		p = cgGetNamedEffectParameter( mObj->_effect, param.c_str() );
-		if( p != NULL ) cgGLSetParameterArray2f( p, 0, sizeof(v), v );
-		//else System.err.println( "(ShaderCGFX)  param3fv is NULL" ); 
+		cgGLSetParameterArray2f( p, 0, sizeof(v), v );
 	}
 
 
@@ -473,32 +434,29 @@ namespace V
 	{
 		CGparameter p = NULL;
 		p = cgGetNamedEffectParameter( mObj->_effect, param.c_str() );
-		if( p != NULL ) cgSetParameter3f( p, x, y, z );
-		//else System.err.println( "(ShaderCGFX)  param3f is NULL" ); 
+		cgSetParameter3f( p, x, y, z );
 	}
 
 	void ShaderCGFX::setParameter3fv( const std::string& param, float* v )
 	{
 		CGparameter p = NULL;
 		p = cgGetNamedEffectParameter( mObj->_effect, param.c_str() );
-		if( p != NULL ) cgGLSetParameterArray3f( p, 0, sizeof(v), v );
-		//else System.err.println( "(ShaderCGFX)  param3fv is NULL" ); 
+		cgGLSetParameterArray3f( p, 0, sizeof(v), v );
 	}
 
 	void ShaderCGFX::setParameter4f( const std::string& param, float x, float y, float z, float w )
 	{
 		CGparameter p = NULL;
 		p = cgGetNamedEffectParameter( mObj->_effect, param.c_str() );
-		if( p != NULL ) cgSetParameter4f( p, x, y, z, w );
-		//else System.err.println( "(ShaderCGFX)  param4f is NULL" ); 
+		cgSetParameter4f( p, x, y, z, w );
 	}
 
 	void ShaderCGFX::setParameter4fv( const std::string& param, float* v )
 	{
 		CGparameter p = NULL;
 		p = cgGetNamedEffectParameter( mObj->_effect, param.c_str() );
-		if( p != NULL ) cgGLSetParameterArray4f( p, 0, sizeof(v), v );
-		//else System.err.println( "(ShaderCGFX)  param4fv is NULL" ); 
+		cgGLSetParameterArray4f( p, 0, sizeof(v), v );
+		//cgGLSetParameterArray4f( p, 0, sizeof(v), v );
 	}
 
 	void ShaderCGFX::setMatrixParameterSemantic( const std::string& param, int matrixType_, int transformType_ )
@@ -506,9 +464,7 @@ namespace V
 		CGGLenum matrix = shaderMatrixMap[matrixType_];
 		CGGLenum transform = shaderTransformMap[transformType_];
 		CGparameter p = cgGetEffectParameterBySemantic( mObj->_effect, param.c_str() );
-		if( p != NULL )	
-			cgGLSetStateMatrixParameter( p, matrix, transform );
-		//else 	System.err.println( "(ShaderCGFX)  setParameterSemantic(mat, type) is NULL" );
+		cgGLSetStateMatrixParameter( p, matrix, transform );
 	}
 
 	void ShaderCGFX::setMatrixParameterSemantic( const std::string& param, float* v )
@@ -516,53 +472,46 @@ namespace V
 		CGparameter p = NULL;
 		p = cgGetEffectParameterBySemantic( mObj->_effect, param.c_str() );
 		//p = cgGetNamedEffectParameter( mObj->_effect, param );
-		if( p != NULL )	cgGLSetMatrixParameterfr( p, v );
-		//else 	System.err.println( "(ShaderCGFX)  setParameterSemantic(v[]) is NULL" );
+		cgGLSetMatrixParameterfr( p, v );
 	}
 
 	void ShaderCGFX::setParameterSemantic( const std::string& param, float x )
 	{
 		CGparameter p = NULL;
 		p = cgGetNamedEffectParameter( mObj->_effect, param.c_str() );
-		if( p != NULL ) cgSetParameter1f( p, x );
-		//else System.err.println( "(ShaderCGFX)  setParameterSemantic(x) is NULL" ); 
+		cgSetParameter1f( p, x );
 	}
 	void ShaderCGFX::setParameterSemantic( const std::string& param, float x, float y )
 	{
 		CGparameter p = NULL;
 		p = cgGetNamedEffectParameter( mObj->_effect, param.c_str() );
-		if( p != NULL ) cgSetParameter2f( p, x, y );
-		//else System.err.println( "(ShaderCGFX)  setParameterSemantic(x, y) is NULL" ); 		
+		cgSetParameter2f( p, x, y );
 	}
 	void ShaderCGFX::setParameterSemantic( const std::string& param, float x, float y, float z )
 	{
 		CGparameter p = NULL;
 		p = cgGetNamedEffectParameter( mObj->_effect, param.c_str() );
-		if( p != NULL ) cgSetParameter3f( p, x, y, z );
-		//else System.err.println( "(ShaderCGFX)  setParameterSemantic(x, y, z) is NULL" ); 				
+		cgSetParameter3f( p, x, y, z );
 	}
 	void ShaderCGFX::setParameterSemantic( const std::string& param, float x, float y, float z, float w )
 	{
 		CGparameter p = NULL;
 		p = cgGetNamedEffectParameter( mObj->_effect, param.c_str() );
-		if( p != NULL ) cgSetParameter4f( p, x, y, z, w );
-		//else System.err.println( "(ShaderCGFX)  setParameterSemantic(x, y, z, w) is NULL" ); 						
+		cgSetParameter4f( p, x, y, z, w );
 	}
 
 	void ShaderCGFX::setParameter4x4d( const std::string& param, double* v )
 	{
 		CGparameter p = NULL;
 		p = cgGetNamedEffectParameter( mObj->_effect, param.c_str() );
-		if( p != NULL )	cgSetMatrixParameterdr( p, v );
-		//else 	System.err.println( "(ShaderCGFX)  matrix4x4d param is NULL" );
+		cgSetMatrixParameterdr( p, v );
 	}
 
 	void ShaderCGFX::setParameter4x4f( const std::string& param, float* v )
 	{
 		CGparameter p = NULL;
 		p = cgGetNamedEffectParameter( mObj->_effect, param.c_str() );
-		if( p != NULL )	cgGLSetMatrixParameterfr( p, v );
-		//else 	System.err.println( "(ShaderCGFX)  matrix4x4f param is NULL" );
+		cgGLSetMatrixParameterfr( p, v );
 	}
 
 	void ShaderCGFX::setParameter4x4f( const std::string& param, int matrixType_, int transformType_ )
@@ -570,8 +519,7 @@ namespace V
 		CGGLenum matrix = V::shaderMatrixMap[matrixType_];
 		CGGLenum transform = V::shaderTransformMap[transformType_];
 		CGparameter p = cgGetNamedEffectParameter( mObj->_effect, param.c_str() );
-		if( p != NULL )	cgGLSetStateMatrixParameter( p, matrix, transform );
-		//else 	System.err.println( "(ShaderCGFX)  matrix4x4f semantic param is NULL" );
+		cgGLSetStateMatrixParameter( p, matrix, transform );
 	}
 
 	void ShaderCGFX::setParameter4x4fBySemantic( const std::string& semanticName, int matrixType_, int transformType_ )
@@ -579,8 +527,7 @@ namespace V
 		CGGLenum matrix = V::shaderMatrixMap[matrixType_];
 		CGGLenum transform = V::shaderTransformMap[transformType_];
 		CGparameter p = cgGetEffectParameterBySemantic( mObj->_effect, semanticName.c_str() );
-		if( p != NULL )	cgGLSetStateMatrixParameter( p, matrix, transform );
-		//else 	System.err.println( "(ShaderCGFX)  matrix4x4f semantic param is NULL" );
+		cgGLSetStateMatrixParameter( p, matrix, transform );
 	}
 
 

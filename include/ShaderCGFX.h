@@ -112,6 +112,8 @@ namespace V
 
 		bool isPassValid();
 
+		int32_t getArrayDimension( const std::string& param );
+
 		void setTextureParameter( const std::string& param, boost::int32_t val );
 		void setParameter1d( const std::string& param, double x );
 		void setParameter1f( const std::string& param, float x );
@@ -149,7 +151,6 @@ namespace V
 	//
 	protected:
 		void checkCgError();
-
 
 	//
 	// Members
