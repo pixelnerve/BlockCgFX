@@ -31,9 +31,9 @@ namespace V
 	void checkCgError()
 	{
 		CGerror error = cgGetError();
-		std::stringstream ss;
-		ss << "[ShaderCGFX]  : " << cgGetErrorString(error);
-		LogError( ss );
+		//std::stringstream ss;
+		//ss << "[ShaderCGFX]  : " << cgGetErrorString(error);
+		//LogError( ss );
 
 		if( error != CG_NO_ERROR ) 
 		{
@@ -110,14 +110,14 @@ namespace V
 	void ShaderCGFX::checkCgError() 
 	{
 		CGerror error = cgGetError();
-		std::stringstream ss;
-		ss << "[ShaderCGFX]  '" << _name << "' : " << cgGetErrorString(error);
-		LogError( ss );
+		//std::stringstream ss;
+		//ss << "[ShaderCGFX]  '" << _name << "' : " << cgGetErrorString(error);
+		//LogError( ss );
 
 		if( error != CG_NO_ERROR ) 
 		{
 			std::stringstream str;
-			str << "CG error: " << cgGetErrorString(error);
+			str << "'" << _name << "'   CG error: " << cgGetErrorString(error);
 			//std::stringstream strListing;
 			//strListing << "CG error: " << cgGetLastListing(mObj->_context);
 			LogError( str );

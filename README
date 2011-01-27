@@ -3,6 +3,9 @@ Block CgFX
 
 Load CgFX effect files easily in to your applications
 
+You will need to install Cg Toolkit from: http://developer.nvidia.com/object/cg_toolkit.html
+
+
 
 Example:
 
