@@ -1,5 +1,5 @@
 /*
-	Copyright (C) 2009-2010 Victor Martins. 
+	Copyright (C) 2007-2010 Victor Martins. 
 	All rights reserved.
  
 	This software is provided 'as-is', without any express or implied warranty.
@@ -9,7 +9,7 @@
 	You may use this file in accordance with the terms contained in an agreement
 	between you and the copyright holder(s).
 	
-	For more information, please visit http://vitamin.pixelnerve.com .
+	For more information, please visit http://www.pixelnerve.com .
 */
 
 
@@ -22,7 +22,6 @@ namespace V
 {
 	void LogError( std::stringstream& ss )
 	{
-		ss << std::endl;
 		OutputDebugStringA( ss.str().c_str() );
 	}
 
@@ -38,7 +37,7 @@ namespace V
 		if( error != CG_NO_ERROR ) 
 		{
 			std::stringstream str;
-			str << "CG error: " << cgGetErrorString(error);
+			str << "CG error: " << cgGetErrorString(error) << std::endl;;
 			std::stringstream strListing;
 			//strListing << "CG error: " << cgGetLastListing(mObj->_context);
 			LogError( str );
@@ -117,7 +116,7 @@ namespace V
 		if( error != CG_NO_ERROR ) 
 		{
 			std::stringstream str;
-			str << "'" << _name << "'   CG error: " << cgGetErrorString(error);
+			str << "'" << _name << "'   CG error: " << cgGetErrorString(error) << std::endl;;
 			//std::stringstream strListing;
 			//strListing << "CG error: " << cgGetLastListing(mObj->_context);
 			LogError( str );
@@ -563,7 +562,7 @@ namespace V
 		if( !fx->load( mContext, filename ) )
 		{
 			std::stringstream ss;
-			ss << "[CGFXManager]  Failed to load effect: '" << filename << "'";
+			ss << "[CGFXManager]  Failed to load effect: '" << filename << "'" << std::endl;
 			LogError( ss );
 			return ShaderCGFXRef();
 		}
@@ -585,7 +584,7 @@ namespace V
 		//}
 
 		std::stringstream ss;
-		ss << "[CGFXManager]  Effect not found! ''" << filename << "'";
+		ss << "[CGFXManager]  Effect not found! ''" << filename << "'" << std::endl;;
 		LogError( ss );
 		return ShaderCGFXRef();
 	}
