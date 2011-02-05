@@ -12,7 +12,7 @@
 	For more information, please visit http://www.pixelnerve.com .
 */
 
-
+#include <cassert>
 #include <string>
 #include <sstream>
 #include "ShaderCGFX.h"
@@ -27,21 +27,18 @@ namespace V
 
 
 
-	void checkCgError()
+	void CHECK_CG_ERROR( CGcontext context )
 	{
 		CGerror error = cgGetError();
-		//std::stringstream ss;
-		//ss << "[ShaderCGFX]  : " << cgGetErrorString(error);
-		//LogError( ss );
+		std::stringstream ss;
+		ss << "[ShaderCGFX]  : " << cgGetErrorString(error) << std::endl;
+		LogError( ss );
 
 		if( error != CG_NO_ERROR ) 
 		{
-			std::stringstream str;
-			str << "CG error: " << cgGetErrorString(error) << std::endl;;
 			std::stringstream strListing;
-			//strListing << "CG error: " << cgGetLastListing(mObj->_context);
-			LogError( str );
-			//LogError( strListing );
+			strListing << "CG error: " << cgGetLastListing(context) << std::endl;
+			LogError( strListing );
 			throw new std::exception( strListing.str().c_str() );
 		}
 	} 
@@ -55,6 +52,8 @@ namespace V
 		_effect = NULL;
 		_currTechnique = NULL;
 		_currPass = NULL;
+		mIsLoaded = false;
+		mId = -1;
 	}
 
 	ShaderCGFX::Obj::~Obj()
@@ -76,6 +75,7 @@ namespace V
 	ShaderCGFX::ShaderCGFX( ) 
 		: mObj( new Obj( true ) )
 	{
+		_context = NULL;
 		//_type = CGFX;
 		_name = "null";
 	}
@@ -86,6 +86,7 @@ namespace V
 	{
 		//_type = CGFX;
 		_name = filename;
+		_context = context;
 
 		this->load( context, filename );
 	}
@@ -106,24 +107,21 @@ namespace V
 		}
 	}
 
-	void ShaderCGFX::checkCgError() 
-	{
-		CGerror error = cgGetError();
-		//std::stringstream ss;
-		//ss << "[ShaderCGFX]  '" << _name << "' : " << cgGetErrorString(error);
-		//LogError( ss );
+	//void ShaderCGFX::checkCgError() 
+	//{
+	//	CGerror error = cgGetError();
+	//	std::stringstream ss;
+	//	ss << "[ShaderCGFX]  '" << _name << "' : " << cgGetErrorString(error) << std::endl;
+	//	LogError( ss );
 
-		if( error != CG_NO_ERROR ) 
-		{
-			std::stringstream str;
-			str << "'" << _name << "'   CG error: " << cgGetErrorString(error) << std::endl;;
-			//std::stringstream strListing;
-			//strListing << "CG error: " << cgGetLastListing(mObj->_context);
-			LogError( str );
-			//LogError( strListing );
-			throw new std::exception( str.str().c_str() );
-		}
-	 } 
+	//	if( error != CG_NO_ERROR ) 
+	//	{
+	//		std::stringstream strListing;
+	//		strListing << "CG error: " << cgGetLastListing(_context) << std::endl;
+	//		LogError( strListing );
+	//		throw new std::exception( strListing.str().c_str() );
+	//	}
+	// } 
 
 
 
@@ -140,6 +138,8 @@ namespace V
 		bool result = false;
 		try 
 		{
+			if( !_context ) 
+				_context = context;
 			_name = filename;
 
 			std::string path = filename;
@@ -148,23 +148,24 @@ namespace V
 			char AppAbsPath[1024];
 			path = "/" + path;
 			path = _getcwd( AppAbsPath, 1024 ) + path;
-			DEBUG_MESSAGE( path.c_str() );
+			//DEBUG_MESSAGE( path.c_str() );
 #else
 			char AppAbsPath[1024];
 			path = "/" + path;
 			path = getcwd( AppAbsPath, 1024 ) + path;
-			DEBUG_MESSAGE( path.c_str() );
+			//DEBUG_MESSAGE( path.c_str() );
 #endif
 
 			mObj->_effect = cgCreateEffectFromFile( context, path.c_str(), NULL ); 
-			if( !mObj->_effect ) return false;
-
-			this->checkCgError();	    
+			CHECK_CG_ERROR( context );
+			//if( !mObj->_effect ) 
+				//return false;
 
 			// Take first technique and pass and save it
 			mObj->_currTechnique = cgGetFirstTechnique( mObj->_effect );    
 			mObj->_currPass = cgGetFirstPass( mObj->_currTechnique );
 
+			// Validate
     		CGbool isValidated = cgValidateTechnique( mObj->_currTechnique );
 			if( isValidated ) result = true;
 			else result = false;
@@ -224,16 +225,32 @@ namespace V
 			}
 
 
+			// OK! This effect is ready to use
+			if( result ) mObj->mIsLoaded = true;
+
 		} catch( std::exception e )
 		{
-			//std::stringstream ss;
-			//ss << "ShaderCGFX:: Failed to load filename: " << file.c_str() << std::endl;
-			//throw std::exception( ss.str().c_str() );
+			std::stringstream ss;
+			ss << "[ShaderCGFX]  Failed to load filename: " << filename.c_str() << std::endl;
+			throw std::exception( ss.str().c_str() );
 		}
 
 		return result;
 	}
 
+
+
+	bool ShaderCGFX::reload()
+	{
+		mObj->mIsLoaded = false;
+
+		if( mObj->_effect )
+		{
+			cgDestroyEffect( mObj->_effect );
+			mObj->_effect = NULL;
+		}
+		return load( _context, _name );
+	}
 
 
 	void ShaderCGFX::enable()
@@ -382,6 +399,7 @@ namespace V
 	{
 		  CGparameter p = NULL;
 		  p = cgGetNamedEffectParameter( mObj->_effect, param.c_str() );
+		  assert( p != NULL );
 		  cgGLSetTextureParameter( p, val );
 		  cgSetSamplerState( p );
 	}
@@ -436,11 +454,12 @@ namespace V
 		cgSetParameter3f( p, x, y, z );
 	}
 
-	void ShaderCGFX::setParameter3fv( const std::string& param, float* v )
+	void ShaderCGFX::setParameter3fv( const std::string& param, const float* v )
 	{
 		CGparameter p = NULL;
 		p = cgGetNamedEffectParameter( mObj->_effect, param.c_str() );
-		cgGLSetParameterArray3f( p, 0, sizeof(v), v );
+		assert( p != NULL );
+		cgGLSetParameterArray3f( p, 0, 0, v );
 	}
 
 	void ShaderCGFX::setParameter4f( const std::string& param, float x, float y, float z, float w )
@@ -450,12 +469,12 @@ namespace V
 		cgSetParameter4f( p, x, y, z, w );
 	}
 
-	void ShaderCGFX::setParameter4fv( const std::string& param, float* v )
+	void ShaderCGFX::setParameter4fv( const std::string& param, const float* v )
 	{
 		CGparameter p = NULL;
 		p = cgGetNamedEffectParameter( mObj->_effect, param.c_str() );
-		cgGLSetParameterArray4f( p, 0, sizeof(v), v );
-		//cgGLSetParameterArray4f( p, 0, sizeof(v), v );
+		assert( p != NULL );
+		cgGLSetParameterArray4f( p, 0, 4, v );
 	}
 
 	void ShaderCGFX::setMatrixParameterSemantic( const std::string& param, int matrixType_, int transformType_ )
@@ -463,6 +482,8 @@ namespace V
 		CGGLenum matrix = shaderMatrixMap[matrixType_];
 		CGGLenum transform = shaderTransformMap[transformType_];
 		CGparameter p = cgGetEffectParameterBySemantic( mObj->_effect, param.c_str() );
+		if( !p ) std::exception( "Failed on setMatrixParameterSemantic()" );
+		//assert( p!=NULL && "Failed on setMatrixParameterSemantic()" );
 		cgGLSetStateMatrixParameter( p, matrix, transform );
 	}
 
@@ -470,7 +491,8 @@ namespace V
 	{
 		CGparameter p = NULL;
 		p = cgGetEffectParameterBySemantic( mObj->_effect, param.c_str() );
-		//p = cgGetNamedEffectParameter( mObj->_effect, param );
+		if( !p ) std::exception( "Failed on setMatrixParameterSemantic()" );
+		//assert( p!=NULL && "Failed on setMatrixParameterSemantic()" );
 		cgGLSetMatrixParameterfr( p, v );
 	}
 
@@ -532,6 +554,7 @@ namespace V
 
 	CGFXManager::CGFXManager()
 	{
+		init();
 	}
 
 	CGFXManager::~CGFXManager()
@@ -550,13 +573,32 @@ namespace V
 	void CGFXManager::init()
 	{
 		mContext = cgCreateContext();
-		checkCgError();
+		CHECK_CG_ERROR( mContext );
 		cgGLRegisterStates( mContext );
 		cgSetParameterSettingMode( mContext, CG_DEFERRED_PARAMETER_SETTING );
 		cgGLSetManageTextureParameters( mContext, true );
+
+		mFXCount = 0;
 	}
 
-	V::ShaderCGFXRef CGFXManager::loadEffectFromFile( std::string filename )
+	ShaderID CGFXManager::createEffectFromFile( const std::string& filename )
+	{
+		ShaderCGFXRef fx = ShaderCGFXRef( new ShaderCGFX() );
+		if( !fx->load( mContext, filename ) )
+		{
+			std::stringstream ss;
+			ss << "[CGFXManager]  Failed to load effect: '" << filename << "'" << std::endl;
+			LogError( ss );
+			return -1;
+		}
+
+		//mEffectList.push_back( std::make_pair(mEffectList.size(), fx) );
+		mEffectMap[mFXCount] = fx;
+		mFXCount++;
+		return mFXCount-1;
+	}
+
+	V::ShaderCGFXRef CGFXManager::loadEffectFromFile( const std::string& filename )
 	{
 		ShaderCGFXRef fx = ShaderCGFXRef( new ShaderCGFX() );
 		if( !fx->load( mContext, filename ) )
@@ -567,25 +609,52 @@ namespace V
 			return ShaderCGFXRef();
 		}
 
-		mEffectList.push_back( std::make_pair(mEffectList.size(), fx) );
-		mEffectMap[filename] = fx;
+		//mEffectList.push_back( std::make_pair(mEffectList.size(), fx) );
+		mEffectMap[mFXCount] = fx;
+		mFXCount++;
 		return fx;
 	}
 
-	V::ShaderCGFXRef CGFXManager::getEffect( std::string filename )
+	void CGFXManager::reloadEffect( V::ShaderCGFXRef fx )
+	{
+		fx->reload();
+	}
+
+	void CGFXManager::reloadEffect( const ShaderID id )
 	{
 		CGFXEffectMap::iterator it;
-		it = mEffectMap.find( filename );
+		it = mEffectMap.find( id );
+		(*it).second->reload();
+	}
+
+
+	void CGFXManager::reloadAll()
+	{
+		for( CGFXEffectMap::iterator it = mEffectMap.begin(); it != mEffectMap.end(); it++ )
+		{
+			(*it).second->reload();
+		}
+	}
+
+	V::ShaderCGFXRef CGFXManager::getEffect( const int32_t id )
+	{
+		CGFXEffectMap::iterator it;
+		it = mEffectMap.find( id );
 		return (*it).second;
-		//for( CGFXEffectList::iterator it = mEffectList.begin(); it != mEffectList.end(); it++ )
-		//{
-		//	if( (*it).second.getName() == filename )
-		//		return (*it).second;
-		//}
 
 		std::stringstream ss;
-		ss << "[CGFXManager]  Effect not found! ''" << filename << "'" << std::endl;;
+		ss << "[CGFXManager]  Effect not found! ''" << id << "'" << std::endl;;
 		LogError( ss );
 		return ShaderCGFXRef();
+	}
+
+	V::ShaderCGFXRef CGFXManager::enable( uint32_t id )
+	{
+		mActiveFX = getEffect( id );
+		return mActiveFX;
+	}
+
+	void CGFXManager::disable()
+	{
 	}
 }

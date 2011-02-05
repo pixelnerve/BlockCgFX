@@ -56,6 +56,8 @@ namespace V
 	// Implementation based on Cinder object
 	class ShaderCGFX
 	{
+	public:
+		typedef std::shared_ptr<ShaderCGFX> Ref;
 		typedef std::map<int, std::string> ParamMap;
 
 
@@ -70,11 +72,14 @@ namespace V
 			// Members
 			CGeffect		_effect;
 
+			int32_t			mId;
+
 			int				_NumOfPasses;
 			CGtechnique		_currTechnique;
 			CGpass			_currPass;
 			ParamMap		_params;
 
+			bool			mIsLoaded;
 			bool			mOwnsData;
 		};
 
@@ -95,7 +100,10 @@ namespace V
 		CGeffect getEffect();
 		const std::string& getName()	{ return _name; }
 
+		bool	isLoaded()				{ return mObj->mIsLoaded; }
+
 		bool load( CGcontext context, const std::string& filename );
+		bool reload();
 
 		void enable();
 		void disable();
@@ -136,9 +144,9 @@ namespace V
 		void setParameter2f( const std::string& param, float x, float y );
 		void setParameter2fv( const std::string& param, float* v );
 		void setParameter3f( const std::string& param, float x, float y, float z );
-		void setParameter3fv( const std::string& param, float* v );
+		void setParameter3fv( const std::string& param, const float* v );
 		void setParameter4f( const std::string& param, float x, float y, float z, float w );
-		void setParameter4fv( const std::string& param, float* v );
+		void setParameter4fv( const std::string& param, const float* v );
 		void setMatrixParameterSemantic( const std::string& param, int matrixType_, int transformType_ );
 		void setMatrixParameterSemantic( const std::string& param, float* v );
 		void setParameterSemantic( const std::string& param, float x );
@@ -163,8 +171,8 @@ namespace V
 	//
 	// Protected methods
 	//
-	protected:
-		void checkCgError();
+	//protected:
+		//void checkCgError();
 
 	//
 	// Members
@@ -174,30 +182,47 @@ namespace V
 		Obj*					mObj;
 
 	protected:
+		CGcontext				_context;
 		std::string				_name;
-		int						_type;
+		int32_t					_type;
 
 	}; // end class
 	typedef std::shared_ptr<ShaderCGFX> ShaderCGFXRef;
 
 
 
-	typedef std::vector< std::pair<boost::uint32_t, ShaderCGFXRef> > CGFXEffectList;
-	typedef std::map<std::string, ShaderCGFXRef> CGFXEffectMap;
+	typedef int32_t ShaderID;
+	//typedef std::vector< std::pair<boost::uint32_t, ShaderCGFXRef> > CGFXEffectList;
+	typedef std::map<int32_t, ShaderCGFXRef> CGFXEffectMap;
 	class CGFXManager
 	{
 	public:
 		CGFXManager();
 		~CGFXManager();
 
-		ShaderCGFXRef loadEffectFromFile( std::string filename );
-		ShaderCGFXRef getEffect( std::string filename );
 		void init();
 
+		// Reference driven
+		ShaderCGFXRef loadEffectFromFile( const std::string& filename );
+		ShaderCGFXRef getEffect( const ShaderID id );
+		void reloadEffect( V::ShaderCGFXRef fx );
+		void reloadEffect( const ShaderID id );
+		void reloadAll();
+
+		ShaderCGFXRef active()	{ return mActiveFX; }
+
+		// Id driven
+		ShaderID createEffectFromFile( const std::string& filename );
+		ShaderCGFXRef enable( uint32_t id );
+		void disable();
+
 	private:
-		CGFXEffectList	mEffectList;
+		//CGFXEffectList	mEffectList;
 		CGFXEffectMap	mEffectMap;
 		CGcontext		mContext;
+
+		ShaderID		mFXCount;
+		ShaderCGFXRef	mActiveFX;
 	};
 
 }	// end namespace
