@@ -136,7 +136,7 @@ namespace V
 
 		int32_t getArrayDimension( const std::string& param );
 
-		void setTextureParameter( const std::string& param, boost::int32_t val );
+		void setTextureParameter( const std::string& param, int32_t val );
 		void setParameter1d( const std::string& param, double x );
 		void setParameter1f( const std::string& param, float x );
 		void setParameter1fv( const std::string& param, float* v );
@@ -149,14 +149,14 @@ namespace V
 		void setParameter4fv( const std::string& param, const float* v );
 		void setMatrixParameterSemantic( const std::string& param, int matrixType_, int transformType_ );
 		void setMatrixParameterSemantic( const std::string& param, float* v );
-		void setParameterSemantic( const std::string& param, float x );
-		void setParameterSemantic( const std::string& param, float x, float y );
-		void setParameterSemantic( const std::string& param, float x, float y, float z );
-		void setParameterSemantic( const std::string& param, float x, float y, float z, float w );
+		//void setParameterSemantic( const std::string& param, float x );
+		//void setParameterSemantic( const std::string& param, float x, float y );
+		//void setParameterSemantic( const std::string& param, float x, float y, float z );
+		//void setParameterSemantic( const std::string& param, float x, float y, float z, float w );
 		void setParameter4x4d( const std::string& param, double* v );
 		void setParameter4x4f( const std::string& param, float* v );
-		void setParameter4x4f( const std::string& param, int matrixType_, int transformType_ );
-		void setParameter4x4fBySemantic( const std::string& semanticName, int matrixType_, int transformType_ );
+		void setParameter4x4f( const std::string& param, int32_t matrixType_, int32_t transformType_ );
+		void setParameter4x4fBySemantic( const std::string& semanticName, int32_t matrixType_, int32_t transformType_ );
 
 	public:
 		// From cinder
@@ -193,7 +193,7 @@ namespace V
 
 	typedef int32_t ShaderID;
 	//typedef std::vector< std::pair<boost::uint32_t, ShaderCGFXRef> > CGFXEffectList;
-	typedef std::map<int32_t, ShaderCGFXRef> CGFXEffectMap;
+	typedef std::map<uint32_t, ShaderCGFXRef> CGFXEffectMap;
 	class CGFXManager
 	{
 	public:

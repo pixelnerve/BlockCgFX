@@ -18,6 +18,11 @@
 #include "ShaderCGFX.h"
 
 
+// Make sure we link libraries
+#pragma comment( lib, "CgGL.lib" )
+#pragma comment( lib, "Cg.lib" )
+
+
 namespace V
 {
 	void LogError( std::stringstream& ss )
@@ -86,7 +91,7 @@ namespace V
 	{
 		//_type = CGFX;
 		_name = filename;
-		_context = context;
+		_context = context;	// pointer to
 
 		this->load( context, filename );
 	}
@@ -228,10 +233,10 @@ namespace V
 			// OK! This effect is ready to use
 			if( result ) mObj->mIsLoaded = true;
 
-		} catch( std::exception e )
+		} catch( std::exception& e )
 		{
 			std::stringstream ss;
-			ss << "[ShaderCGFX]  Failed to load filename: " << filename.c_str() << std::endl;
+			ss << e.what() << "\n[ShaderCGFX]  Failed to load filename: " << filename.c_str() << std::endl;
 			throw std::exception( ss.str().c_str() );
 		}
 
@@ -496,30 +501,30 @@ namespace V
 		cgGLSetMatrixParameterfr( p, v );
 	}
 
-	void ShaderCGFX::setParameterSemantic( const std::string& param, float x )
-	{
-		CGparameter p = NULL;
-		p = cgGetNamedEffectParameter( mObj->_effect, param.c_str() );
-		cgSetParameter1f( p, x );
-	}
-	void ShaderCGFX::setParameterSemantic( const std::string& param, float x, float y )
-	{
-		CGparameter p = NULL;
-		p = cgGetNamedEffectParameter( mObj->_effect, param.c_str() );
-		cgSetParameter2f( p, x, y );
-	}
-	void ShaderCGFX::setParameterSemantic( const std::string& param, float x, float y, float z )
-	{
-		CGparameter p = NULL;
-		p = cgGetNamedEffectParameter( mObj->_effect, param.c_str() );
-		cgSetParameter3f( p, x, y, z );
-	}
-	void ShaderCGFX::setParameterSemantic( const std::string& param, float x, float y, float z, float w )
-	{
-		CGparameter p = NULL;
-		p = cgGetNamedEffectParameter( mObj->_effect, param.c_str() );
-		cgSetParameter4f( p, x, y, z, w );
-	}
+	//void ShaderCGFX::setParameterSemantic( const std::string& param, float x )
+	//{
+	//	CGparameter p = NULL;
+	//	p = cgGetNamedEffectParameter( mObj->_effect, param.c_str() );
+	//	cgSetParameter1f( p, x );
+	//}
+	//void ShaderCGFX::setParameterSemantic( const std::string& param, float x, float y )
+	//{
+	//	CGparameter p = NULL;
+	//	p = cgGetNamedEffectParameter( mObj->_effect, param.c_str() );
+	//	cgSetParameter2f( p, x, y );
+	//}
+	//void ShaderCGFX::setParameterSemantic( const std::string& param, float x, float y, float z )
+	//{
+	//	CGparameter p = NULL;
+	//	p = cgGetNamedEffectParameter( mObj->_effect, param.c_str() );
+	//	cgSetParameter3f( p, x, y, z );
+	//}
+	//void ShaderCGFX::setParameterSemantic( const std::string& param, float x, float y, float z, float w )
+	//{
+	//	CGparameter p = NULL;
+	//	p = cgGetNamedEffectParameter( mObj->_effect, param.c_str() );
+	//	cgSetParameter4f( p, x, y, z, w );
+	//}
 
 	void ShaderCGFX::setParameter4x4d( const std::string& param, double* v )
 	{
@@ -535,7 +540,7 @@ namespace V
 		cgGLSetMatrixParameterfr( p, v );
 	}
 
-	void ShaderCGFX::setParameter4x4f( const std::string& param, int matrixType_, int transformType_ )
+	void ShaderCGFX::setParameter4x4f( const std::string& param, int32_t matrixType_, int32_t transformType_ )
 	{
 		CGGLenum matrix = V::shaderMatrixMap[matrixType_];
 		CGGLenum transform = V::shaderTransformMap[transformType_];
@@ -543,7 +548,7 @@ namespace V
 		cgGLSetStateMatrixParameter( p, matrix, transform );
 	}
 
-	void ShaderCGFX::setParameter4x4fBySemantic( const std::string& semanticName, int matrixType_, int transformType_ )
+	void ShaderCGFX::setParameter4x4fBySemantic( const std::string& semanticName, int32_t matrixType_, int32_t transformType_ )
 	{
 		CGGLenum matrix = V::shaderMatrixMap[matrixType_];
 		CGGLenum transform = V::shaderTransformMap[transformType_];
@@ -554,7 +559,7 @@ namespace V
 
 	CGFXManager::CGFXManager()
 	{
-		init();
+		//init();
 	}
 
 	CGFXManager::~CGFXManager()
@@ -573,7 +578,7 @@ namespace V
 	void CGFXManager::init()
 	{
 		mContext = cgCreateContext();
-		CHECK_CG_ERROR( mContext );
+		//CHECK_CG_ERROR( mContext );
 		cgGLRegisterStates( mContext );
 		cgSetParameterSettingMode( mContext, CG_DEFERRED_PARAMETER_SETTING );
 		cgGLSetManageTextureParameters( mContext, true );
@@ -630,7 +635,7 @@ namespace V
 
 	void CGFXManager::reloadAll()
 	{
-		for( CGFXEffectMap::iterator it = mEffectMap.begin(); it != mEffectMap.end(); it++ )
+		for( CGFXEffectMap::iterator it = mEffectMap.begin(); it != mEffectMap.end(); ++it )
 		{
 			(*it).second->reload();
 		}
