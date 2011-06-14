@@ -19,8 +19,8 @@
 
 
 // Make sure we link libraries
-#pragma comment( lib, "CgGL.lib" )
-#pragma comment( lib, "Cg.lib" )
+//#pragma comment( lib, "CgGL.lib" )
+//#pragma comment( lib, "Cg.lib" )
 
 
 namespace V
@@ -393,14 +393,14 @@ namespace V
 
 
 
-	int32_t ShaderCGFX::getArrayDimension( const std::string& param )
+	int ShaderCGFX::getArrayDimension( const std::string& param )
 	{
 		CGparameter p = cgGetNamedEffectParameter( mObj->_effect, param.c_str() );
 		return cgGetArrayDimension( p );
 	}
 
 
-	void ShaderCGFX::setTextureParameter( const std::string& param, boost::int32_t val )
+	void ShaderCGFX::setTextureParameter( const std::string& param, int val )
 	{
 		  CGparameter p = NULL;
 		  p = cgGetNamedEffectParameter( mObj->_effect, param.c_str() );
@@ -540,7 +540,7 @@ namespace V
 		cgGLSetMatrixParameterfr( p, v );
 	}
 
-	void ShaderCGFX::setParameter4x4f( const std::string& param, int32_t matrixType_, int32_t transformType_ )
+	void ShaderCGFX::setParameter4x4f( const std::string& param, int matrixType_, int transformType_ )
 	{
 		CGGLenum matrix = V::shaderMatrixMap[matrixType_];
 		CGGLenum transform = V::shaderTransformMap[transformType_];
@@ -548,7 +548,7 @@ namespace V
 		cgGLSetStateMatrixParameter( p, matrix, transform );
 	}
 
-	void ShaderCGFX::setParameter4x4fBySemantic( const std::string& semanticName, int32_t matrixType_, int32_t transformType_ )
+	void ShaderCGFX::setParameter4x4fBySemantic( const std::string& semanticName, int matrixType_, int transformType_ )
 	{
 		CGGLenum matrix = V::shaderMatrixMap[matrixType_];
 		CGGLenum transform = V::shaderTransformMap[transformType_];
@@ -641,7 +641,7 @@ namespace V
 		}
 	}
 
-	V::ShaderCGFXRef CGFXManager::getEffect( const int32_t id )
+	V::ShaderCGFXRef CGFXManager::getEffect( const int id )
 	{
 		CGFXEffectMap::iterator it;
 		it = mEffectMap.find( id );
@@ -653,7 +653,7 @@ namespace V
 		return ShaderCGFXRef();
 	}
 
-	V::ShaderCGFXRef CGFXManager::enable( uint32_t id )
+	V::ShaderCGFXRef CGFXManager::enable( unsigned int id )
 	{
 		mActiveFX = getEffect( id );
 		return mActiveFX;

@@ -72,7 +72,7 @@ namespace V
 			// Members
 			CGeffect		_effect;
 
-			int32_t			mId;
+			int			mId;
 
 			int				_NumOfPasses;
 			CGtechnique		_currTechnique;
@@ -134,9 +134,9 @@ namespace V
 
 		bool isPassValid();
 
-		int32_t getArrayDimension( const std::string& param );
+		int getArrayDimension( const std::string& param );
 
-		void setTextureParameter( const std::string& param, int32_t val );
+		void setTextureParameter( const std::string& param, int val );
 		void setParameter1d( const std::string& param, double x );
 		void setParameter1f( const std::string& param, float x );
 		void setParameter1fv( const std::string& param, float* v );
@@ -155,8 +155,8 @@ namespace V
 		//void setParameterSemantic( const std::string& param, float x, float y, float z, float w );
 		void setParameter4x4d( const std::string& param, double* v );
 		void setParameter4x4f( const std::string& param, float* v );
-		void setParameter4x4f( const std::string& param, int32_t matrixType_, int32_t transformType_ );
-		void setParameter4x4fBySemantic( const std::string& semanticName, int32_t matrixType_, int32_t transformType_ );
+		void setParameter4x4f( const std::string& param, int matrixType_, int transformType_ );
+		void setParameter4x4fBySemantic( const std::string& semanticName, int matrixType_, int transformType_ );
 
 	public:
 		// From cinder
@@ -184,16 +184,16 @@ namespace V
 	protected:
 		CGcontext				_context;
 		std::string				_name;
-		int32_t					_type;
+		int					_type;
 
 	}; // end class
 	typedef std::shared_ptr<ShaderCGFX> ShaderCGFXRef;
 
 
 
-	typedef int32_t ShaderID;
-	//typedef std::vector< std::pair<boost::uint32_t, ShaderCGFXRef> > CGFXEffectList;
-	typedef std::map<uint32_t, ShaderCGFXRef> CGFXEffectMap;
+	typedef int ShaderID;
+	//typedef std::vector< std::pair<boost::uint, ShaderCGFXRef> > CGFXEffectList;
+	typedef std::map<unsigned int, ShaderCGFXRef> CGFXEffectMap;
 	class CGFXManager
 	{
 	public:
@@ -213,7 +213,7 @@ namespace V
 
 		// Id driven
 		ShaderID createEffectFromFile( const std::string& filename );
-		ShaderCGFXRef enable( uint32_t id );
+		ShaderCGFXRef enable( unsigned int id );
 		void disable();
 
 	private:
