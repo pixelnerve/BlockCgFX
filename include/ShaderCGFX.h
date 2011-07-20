@@ -29,8 +29,9 @@
 
 #include <map>
 #include <vector>
-
+#include <string>
 #include <boost/cstdint.hpp>
+#include <boost/smart_ptr.hpp>
 
 #include "CG/cg.h"
 #include "CG/CgGL.h"
@@ -42,11 +43,11 @@
 #pragma  comment( lib, "Cg.lib" )
 #pragma  comment( lib, "CgGL.lib" )
 #elif defined(linux) || defined(__linux) || defined(__linux__)
-#pragma  comment( lib, "Cg.lib" )
-#pragma  comment( lib, "CgGL.lib" )
+//#pragma  comment( lib, "Cg.lib" )
+//#pragma  comment( lib, "CgGL.lib" )
 #elif defined(macintosh) || defined(__APPLE__) || defined(__APPLE_CC__)
-#pragma  comment( lib, "Cg.lib" )
-#pragma  comment( lib, "CgGL.lib" )
+//#pragma  comment( lib, "Cg.lib" )
+//#pragma  comment( lib, "CgGL.lib" )
 #endif
 
 
@@ -57,7 +58,7 @@ namespace V
 	class ShaderCGFX
 	{
 	public:
-		typedef std::shared_ptr<ShaderCGFX> Ref;
+		typedef boost::shared_ptr<ShaderCGFX> Ref;
 		typedef std::map<int, std::string> ParamMap;
 
 
@@ -187,7 +188,7 @@ namespace V
 		int					_type;
 
 	}; // end class
-	typedef std::shared_ptr<ShaderCGFX> ShaderCGFXRef;
+	typedef boost::shared_ptr<ShaderCGFX> ShaderCGFXRef;
 
 
 

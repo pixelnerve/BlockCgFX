@@ -12,6 +12,7 @@
 	For more information, please visit http://www.pixelnerve.com .
 */
 
+#include <exception>
 #include <cassert>
 #include <string>
 #include <sstream>
@@ -25,9 +26,23 @@
 
 namespace V
 {
+    class CgfxException: public std::exception
+    {
+    public:
+        CgfxException( char* msg ) { _msg = msg; }
+        virtual const char* what() const throw() { return _msg; }
+    private:
+        char* _msg;
+    };
+    
+    
 	void LogError( std::stringstream& ss )
 	{
+#ifdef _WIN32
 		OutputDebugStringA( ss.str().c_str() );
+#else
+        printf( (char*)ss.str().c_str() );
+#endif
 	}
 
 
@@ -44,7 +59,7 @@ namespace V
 			std::stringstream strListing;
 			strListing << "CG error: " << cgGetLastListing(context) << std::endl;
 			LogError( strListing );
-			throw new std::exception( strListing.str().c_str() );
+			throw new CgfxException( (char*)strListing.str().c_str() );
 		}
 	} 
 
@@ -237,7 +252,7 @@ namespace V
 		{
 			std::stringstream ss;
 			ss << e.what() << "\n[ShaderCGFX]  Failed to load filename: " << filename.c_str() << std::endl;
-			throw std::exception( ss.str().c_str() );
+			throw CgfxException( (char*)ss.str().c_str() );
 		}
 
 		return result;
@@ -487,7 +502,7 @@ namespace V
 		CGGLenum matrix = shaderMatrixMap[matrixType_];
 		CGGLenum transform = shaderTransformMap[transformType_];
 		CGparameter p = cgGetEffectParameterBySemantic( mObj->_effect, param.c_str() );
-		if( !p ) std::exception( "Failed on setMatrixParameterSemantic()" );
+		if( !p ) throw new CgfxException( "Failed on setMatrixParameterSemantic()" );
 		//assert( p!=NULL && "Failed on setMatrixParameterSemantic()" );
 		cgGLSetStateMatrixParameter( p, matrix, transform );
 	}
@@ -496,7 +511,7 @@ namespace V
 	{
 		CGparameter p = NULL;
 		p = cgGetEffectParameterBySemantic( mObj->_effect, param.c_str() );
-		if( !p ) std::exception( "Failed on setMatrixParameterSemantic()" );
+		if( !p ) throw new CgfxException( "Failed on setMatrixParameterSemantic()" );
 		//assert( p!=NULL && "Failed on setMatrixParameterSemantic()" );
 		cgGLSetMatrixParameterfr( p, v );
 	}
