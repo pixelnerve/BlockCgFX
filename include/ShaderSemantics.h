@@ -47,7 +47,7 @@ namespace V
 	};
 
 
-	CGGLenum shaderMatrixMap[];
-	CGGLenum shaderTransformMap[];
+	extern "C" CGGLenum shaderMatrixMap[];
+	extern "C" CGGLenum shaderTransformMap[];
 
 }	// V
