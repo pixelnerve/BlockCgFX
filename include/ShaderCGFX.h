@@ -24,7 +24,9 @@
 #elif defined(linux) || defined(__linux) || defined(__linux__)
 #define DEBUG_MESSAGE( x ) printf( x )
 #elif defined(macintosh) || defined(__APPLE__) || defined(__APPLE_CC__)
+#ifndef DEBUG_MESSAGE( x )
 #define DEBUG_MESSAGE( x ) printf( x )
+#endif
 #endif
 
 #include <map>
