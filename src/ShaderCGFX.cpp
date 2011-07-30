@@ -29,11 +29,12 @@ namespace V
     class CgfxException: public std::exception
     {
     public:
-        CgfxException( char* msg ) { _msg = msg; }
+        CgfxException( const char* msg ) { _msg = (char*)msg; }
         virtual const char* what() const throw() { return _msg; }
     private:
         char* _msg;
     };
+    
     
     
 	void LogError( std::stringstream& ss )
@@ -41,7 +42,7 @@ namespace V
 #ifdef _WIN32
 		OutputDebugStringA( ss.str().c_str() );
 #else
-        printf( (char*)ss.str().c_str() );
+        printf( "%s", ss.str().c_str() );
 #endif
 	}
 
@@ -163,7 +164,7 @@ namespace V
 			_name = filename;
 
 			std::string path = filename;
-
+/*
 #if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
 			char AppAbsPath[1024];
 			path = "/" + path;
@@ -175,7 +176,7 @@ namespace V
 			path = getcwd( AppAbsPath, 1024 ) + path;
 			//DEBUG_MESSAGE( path.c_str() );
 #endif
-
+*/
 			mObj->_effect = cgCreateEffectFromFile( context, path.c_str(), NULL ); 
 			CHECK_CG_ERROR( context );
 			//if( !mObj->_effect ) 
