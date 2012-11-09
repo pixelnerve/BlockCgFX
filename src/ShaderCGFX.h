@@ -32,8 +32,6 @@
 #include <map>
 #include <vector>
 #include <string>
-#include <boost/cstdint.hpp>
-#include <boost/smart_ptr.hpp>
 
 #include "CG/cg.h"
 #include "CG/CgGL.h"
@@ -60,7 +58,7 @@ namespace V
 	class ShaderCGFX
 	{
 	public:
-		typedef boost::shared_ptr<ShaderCGFX> Ref;
+		typedef std::shared_ptr<ShaderCGFX> Ref;
 		typedef std::map<int, std::string> ParamMap;
 
 
@@ -162,14 +160,6 @@ namespace V
 		void setParameter4x4fBySemantic( const std::string& semanticName, int matrixType_, int transformType_ );
 
 	public:
-		// From cinder
-		//@{	
-		//! Emulates shared_ptr-like behavior
-		//typedef std::shared_ptr<Obj> ShaderCGFX::*unspecified_bool_type;
-		//operator unspecified_bool_type() const { return ( mObj.get() == 0 ) ? 0 : &ShaderCGFX::mObj; }
-		//void reset() { mObj.reset(); }
-		//@}
-
 
 	//
 	// Protected methods
@@ -181,7 +171,6 @@ namespace V
 	// Members
 	//
 	private:
-		//std::shared_ptr<Obj>	mObj;
 		Obj*					mObj;
 
 	protected:
@@ -190,12 +179,11 @@ namespace V
 		int					_type;
 
 	}; // end class
-	typedef boost::shared_ptr<ShaderCGFX> ShaderCGFXRef;
+	typedef std::shared_ptr<ShaderCGFX> ShaderCGFXRef;
 
 
 
 	typedef int ShaderID;
-	//typedef std::vector< std::pair<boost::uint, ShaderCGFXRef> > CGFXEffectList;
 	typedef std::map<unsigned int, ShaderCGFXRef> CGFXEffectMap;
 	class CGFXManager
 	{
@@ -220,7 +208,6 @@ namespace V
 		void disable();
 
 	private:
-		//CGFXEffectList	mEffectList;
 		CGFXEffectMap	mEffectMap;
 		CGcontext		mContext;
 
@@ -229,6 +216,3 @@ namespace V
 	};
 
 }	// end namespace
-
-
-//#endif

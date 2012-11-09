@@ -47,6 +47,30 @@ namespace V
 	}
 
 
+	static void checkForCgError( CGcontext context, const char *situation )
+	{
+		CGerror error;
+		const char *string = cgGetLastErrorString( &error );
+
+		std::stringstream strr;
+		strr << situation << std::endl;
+		LogError( strr );
+
+		if (error != CG_NO_ERROR) 
+		{
+			std::stringstream str;
+			str << "  -- CG error: " << string << std::endl;
+			LogError( str );
+			//if (error == CG_COMPILER_ERROR) 
+			{
+				std::stringstream strListing;
+				strListing << (char*)cgGetLastListing( context ) << std::endl;
+				LogError( strListing );
+			}
+		}
+		else
+			OutputDebugStringA( "CgFX NO ERROR\n" );
+	}
 
 	void CHECK_CG_ERROR( CGcontext context )
 	{
@@ -178,7 +202,8 @@ namespace V
 #endif
 */
 			mObj->_effect = cgCreateEffectFromFile( context, path.c_str(), NULL ); 
-			CHECK_CG_ERROR( context );
+			checkForCgError( context, "load effect file" );
+			//CHECK_CG_ERROR( context );
 			//if( !mObj->_effect ) 
 				//return false;
 
@@ -188,8 +213,15 @@ namespace V
 
 			// Validate
     		CGbool isValidated = cgValidateTechnique( mObj->_currTechnique );
-			if( isValidated ) result = true;
-			else result = false;
+			//OutputDebugStringA( cgGetTechniqueName( mObj->_currTechnique ) );
+			checkForCgError( context, "validate technique" );
+			if( isValidated == CG_TRUE ) 
+				result = true;
+			else
+			{
+				DEBUG_MESSAGE( "*** Failed to validate technique. Check if profile is a valid one\n" );
+				result = false;
+			}
 
 
 			/*
@@ -256,7 +288,7 @@ namespace V
 			throw CgfxException( (char*)ss.str().c_str() );
 		}
 
-		return result;
+		return true;
 	}
 
 
@@ -302,10 +334,12 @@ namespace V
 	void ShaderCGFX::setTechnique( const std::string& name )
 	{
 		mObj->_currTechnique = cgGetNamedTechnique( mObj->_effect, name.c_str() );    
+//		checkForCgError( _context, "setTechnique" );
 		//if( mObj->_currTechnique == NULL ) System.err.println( "(ShaderCGFX)  technique '" + name + "' is NULL" );
 
 		// Get technique's first pass
 		mObj->_currPass = cgGetFirstPass( mObj->_currTechnique );
+//		checkForCgError( _context, "setTechnique" );
 	}
 
 
@@ -335,7 +369,7 @@ namespace V
 	void ShaderCGFX::setPass()
 	{
 		cgSetPassState( mObj->_currPass );
-		//checkCgError();
+//		checkForCgError( _context, "setPass" );
 	}
 
 
@@ -351,7 +385,7 @@ namespace V
 	void ShaderCGFX::resetPass()
 	{
 		cgResetPassState( mObj->_currPass ); 
-		//checkCgError();
+//		checkForCgError( _context, "resetPass" );
 	}
 
 
@@ -575,6 +609,7 @@ namespace V
 
 	CGFXManager::CGFXManager()
 	{
+		mContext = NULL;
 		//init();
 	}
 
@@ -593,11 +628,47 @@ namespace V
 
 	void CGFXManager::init()
 	{
+		CGerror err  = CG_NO_ERROR;
+
 		mContext = cgCreateContext();
+		checkForCgError( mContext, "create context" );
 		//CHECK_CG_ERROR( mContext );
 		cgGLRegisterStates( mContext );
+		checkForCgError( mContext, "register states" );
+		//cgGLSetDebugMode(CG_FALSE);
 		cgSetParameterSettingMode( mContext, CG_DEFERRED_PARAMETER_SETTING );
 		cgGLSetManageTextureParameters( mContext, true );
+		checkForCgError( mContext, "manage texture parameters" );
+
+		CGprofile profile;
+		int nProfiles = cgGetNumSupportedProfiles();
+		std::stringstream ss;
+		ss << "NumSupportedProfiles: " << nProfiles << std::endl;
+		DEBUG_MESSAGE( ss.str().c_str() );
+
+		DEBUG_MESSAGE( "OpenGL Profiles:\n" );
+		for( int i=0; i<nProfiles; ++i ) 
+		{
+			profile = cgGetSupportedProfile( i );
+			if( cgGetProfileProperty(profile, CG_IS_OPENGL_PROFILE) ) 
+			{
+				std::stringstream ss1;
+				ss1 << "    - " << cgGetProfileString(profile) << std::endl;
+				DEBUG_MESSAGE( ss1.str().c_str() );
+			}
+/*
+			if( cgGetProfileProperty(profile, CG_IS_OPENGL_PROFILE) ) 
+			{
+				ss1 << cgGetProfileString(profile) << " is an OpenGL profile\n" << std::endl;
+				DEBUG_MESSAGE( ss1.str().c_str() );
+			} 
+			else 
+			{
+				ss1 << cgGetProfileString(profile) << " is not an OpenGL profile\n" << std::endl;
+				DEBUG_MESSAGE( ss1.str().c_str() );
+			}
+*/
+		}
 
 		mFXCount = 0;
 	}
