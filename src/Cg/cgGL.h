@@ -1,6 +1,6 @@
 /*
  *
- * Copyright (c) 2002-2010, NVIDIA Corporation.
+ * Copyright (c) 2002-2012, NVIDIA Corporation.
  *
  *
  *
@@ -99,10 +99,14 @@
 # endif
 #endif
 
-#ifdef __APPLE__
-#include <OpenGL/gl.h>
-#else
-#include <GL/gl.h>
+/* Use CGGL_NO_OPENGL to avoid including OpenGL headers. */
+
+#ifndef CGGL_NO_OPENGL
+# ifdef __APPLE__
+#  include <OpenGL/gl.h>
+# else
+#  include <GL/gl.h>
+# endif
 #endif
 
 /*************************************************************************/
@@ -125,6 +129,14 @@ typedef enum
   CG_GL_TESSELLATION_CONTROL        = 11,
   CG_GL_TESSELLATION_EVALUATION     = 12
 } CGGLenum;
+
+typedef enum
+{
+  CG_GL_GLSL_DEFAULT = 0,
+  CG_GL_GLSL_100     = 1,
+  CG_GL_GLSL_110     = 2,
+  CG_GL_GLSL_120     = 3
+} CGGLglslversion;
 
 #ifdef __cplusplus
 extern "C"
@@ -223,6 +235,14 @@ CGGL_API void CGGLENTRY cgGLDisableProgramProfiles(CGprogram program);
 CGGL_API void CGGLENTRY cgGLSetDebugMode(CGbool debug);
 CGGL_API CGbuffer CGGLENTRY cgGLCreateBuffer(CGcontext context, int size, const void *data, GLenum bufferUsage);
 CGGL_API GLuint CGGLENTRY cgGLGetBufferObject(CGbuffer buffer);
+CGGL_API CGbuffer CGGLENTRY cgGLCreateBufferFromObject(CGcontext context, GLuint obj, CGbool manageObject);
+CGGL_API void CGGLENTRY cgGLSetContextOptimalOptions(CGcontext context, CGprofile profile);
+CGGL_API char const ** CGGLENTRY cgGLGetContextOptimalOptions(CGcontext context, CGprofile profile);
+CGGL_API void CGGLENTRY cgGLSetContextGLSLVersion(CGcontext context, CGGLglslversion version);
+CGGL_API CGGLglslversion CGGLENTRY cgGLGetContextGLSLVersion(CGcontext context);
+CGGL_API const char * CGGLENTRY cgGLGetGLSLVersionString(CGGLglslversion version);
+CGGL_API CGGLglslversion CGGLENTRY cgGLGetGLSLVersion(const char *version_string);
+CGGL_API CGGLglslversion CGGLENTRY cgGLDetectGLSLVersion(void);
 
 #endif
 

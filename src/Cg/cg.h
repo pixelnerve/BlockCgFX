@@ -1,6 +1,6 @@
 /*
  *
- * Copyright (c) 2002-2010, NVIDIA Corporation.
+ * Copyright (c) 2002-2012, NVIDIA Corporation.
  *
  *
  *
@@ -56,7 +56,7 @@
 /*** CG Run-Time Library API                                           ***/
 /*************************************************************************/
 
-#define CG_VERSION_NUM                3000
+#define CG_VERSION_NUM                3100
 
 #ifdef _WIN32
 # ifndef APIENTRY /* From Win32's <windef.h> */
@@ -126,7 +126,8 @@ typedef enum
   CG_BEHAVIOR_LATEST  = 1,                /* latest behavior supported at runtime      */
   CG_BEHAVIOR_2200    = 1000,             /* default behavior                          */
   CG_BEHAVIOR_3000    = 2000,
-  CG_BEHAVIOR_CURRENT = CG_BEHAVIOR_3000  /* latest behavior supported at compile time */
+  CG_BEHAVIOR_3100    = 3000,
+  CG_BEHAVIOR_CURRENT = CG_BEHAVIOR_3100  /* latest behavior supported at compile time */
 } CGbehavior;
 
 typedef enum
@@ -137,23 +138,29 @@ typedef enum
   CG_STRUCT            = 1,
   CG_TYPELESS_STRUCT   = 3,
   CG_TEXTURE           = 1137,
+  CG_BUFFER            = 1319,
+  CG_UNIFORMBUFFER     = 1320,
+  CG_ADDRESS           = 1321,
   CG_PIXELSHADER_TYPE  = 1142,
   CG_PROGRAM_TYPE      = 1136,
   CG_VERTEXSHADER_TYPE = 1141,
-  CG_TYPE_START_ENUM   = 1024,
   CG_SAMPLER           = 1143,
   CG_SAMPLER1D         = 1065,
   CG_SAMPLER1DARRAY    = 1138,
   CG_SAMPLER1DSHADOW   = 1313,
   CG_SAMPLER2D         = 1066,
   CG_SAMPLER2DARRAY    = 1139,
+  CG_SAMPLER2DMS       = 1317, /* ARB_texture_multisample */
+  CG_SAMPLER2DMSARRAY  = 1318, /* ARB_texture_multisample */
   CG_SAMPLER2DSHADOW   = 1314,
   CG_SAMPLER3D         = 1067,
   CG_SAMPLERBUF        = 1144,
   CG_SAMPLERCUBE       = 1069,
   CG_SAMPLERCUBEARRAY  = 1140,
+  CG_SAMPLERRBUF       = 1316, /* NV_explicit_multisample */
   CG_SAMPLERRECT       = 1068,
   CG_SAMPLERRECTSHADOW = 1315,
+  CG_TYPE_START_ENUM   = 1024,
   CG_BOOL              = 1114,
   CG_BOOL1             = 1115,
   CG_BOOL2             = 1116,
@@ -743,6 +750,8 @@ typedef enum
   CG_CONTROLPOINTID        = 4417,
   CG_EDGETESS              = 4418,
   CG_INNERTESS             = 4419,
+  CG_SAMPLEPOS             = 4420,
+  CG_NUMSAMPLES            = 4421,
   CG_UNDEFINED             = 3256
 } CGresource;
 
@@ -933,7 +942,8 @@ typedef enum
   CG_PARAMETERCLASS_STRUCT  = 4,
   CG_PARAMETERCLASS_ARRAY   = 5,
   CG_PARAMETERCLASS_SAMPLER = 6,
-  CG_PARAMETERCLASS_OBJECT  = 7
+  CG_PARAMETERCLASS_OBJECT  = 7,
+  CG_PARAMETERCLASS_BUFFER  = 8
 } CGparameterclass;
 
 typedef enum
@@ -1022,6 +1032,8 @@ CG_API char const * const * CGENTRY cgGetProgramOptions(CGprogram program);
 CG_API void CGENTRY cgSetProgramProfile(CGprogram program, CGprofile profile);
 CG_API CGenum CGENTRY cgGetProgramInput(CGprogram program);
 CG_API CGenum CGENTRY cgGetProgramOutput(CGprogram program);
+CG_API int CGENTRY cgGetProgramOutputVertices(CGprogram program);
+CG_API void CGENTRY cgSetProgramOutputVertices(CGprogram program, int vertices);
 CG_API void CGENTRY cgSetPassProgramParameters(CGprogram program);
 CG_API void CGENTRY cgUpdateProgramParameters(CGprogram program);
 CG_API void CGENTRY cgUpdatePassParameters(CGpass pass);
@@ -1036,12 +1048,17 @@ CG_API int CGENTRY cgGetNumConnectedToParameters(CGparameter param);
 CG_API CGparameter CGENTRY cgGetConnectedToParameter(CGparameter param, int index);
 CG_API CGparameter CGENTRY cgGetNamedParameter(CGprogram program, const char *name);
 CG_API CGparameter CGENTRY cgGetNamedProgramParameter(CGprogram program, CGenum name_space, const char *name);
+CG_API CGparameter CGENTRY cgGetNamedProgramUniformBuffer(CGprogram program, const char *blockName);
+CG_API CGparameter CGENTRY cgGetNamedEffectUniformBuffer(CGeffect effect, const char *blockName);
+CG_API const char * CGENTRY cgGetUniformBufferBlockName(CGparameter param);
 CG_API CGparameter CGENTRY cgGetFirstParameter(CGprogram program, CGenum name_space);
 CG_API CGparameter CGENTRY cgGetNextParameter(CGparameter current);
 CG_API CGparameter CGENTRY cgGetFirstLeafParameter(CGprogram program, CGenum name_space);
 CG_API CGparameter CGENTRY cgGetNextLeafParameter(CGparameter current);
 CG_API CGparameter CGENTRY cgGetFirstStructParameter(CGparameter param);
+CG_API CGparameter CGENTRY cgGetFirstUniformBufferParameter(CGparameter param);
 CG_API CGparameter CGENTRY cgGetNamedStructParameter(CGparameter param, const char *name);
+CG_API CGparameter CGENTRY cgGetNamedUniformBufferParameter(CGparameter param, const char *name);
 CG_API CGparameter CGENTRY cgGetFirstDependentParameter(CGparameter param);
 CG_API CGparameter CGENTRY cgGetArrayParameter(CGparameter aparam, int index);
 CG_API int CGENTRY cgGetArrayDimension(CGparameter param);
@@ -1306,6 +1323,7 @@ CG_API CGbool CGENTRY cgGetTypeSizes(CGtype type, int *nrows, int *ncols);
 CG_API void CGENTRY cgGetMatrixSize(CGtype type, int *nrows, int *ncols);
 CG_API int CGENTRY cgGetNumProgramDomains(CGprogram program);
 CG_API CGdomain CGENTRY cgGetProfileDomain(CGprofile profile);
+CG_API CGprofile CGENTRY cgGetProfileSibling(CGprofile profile, CGdomain domain);
 CG_API CGprogram CGENTRY cgCombinePrograms(int n, const CGprogram *exeList);
 CG_API CGprogram CGENTRY cgCombinePrograms2(const CGprogram exe1, const CGprogram exe2);
 CG_API CGprogram CGENTRY cgCombinePrograms3(const CGprogram exe1, const CGprogram exe2, const CGprogram exe3);
@@ -1322,13 +1340,16 @@ CG_API const char * CGENTRY cgGetParameterResourceName(CGparameter param);
 CG_API int CGENTRY cgGetParameterBufferIndex(CGparameter param);
 CG_API int CGENTRY cgGetParameterBufferOffset(CGparameter param);
 CG_API CGbuffer CGENTRY cgCreateBuffer(CGcontext context, int size, const void *data, CGbufferusage bufferUsage);
+CG_API CGbool CGENTRY cgIsBuffer(CGbuffer buffer);
 CG_API void CGENTRY cgSetBufferData(CGbuffer buffer, int size, const void *data);
 CG_API void CGENTRY cgSetBufferSubData(CGbuffer buffer, int offset, int size, const void *data);
 CG_API void CGENTRY cgSetProgramBuffer(CGprogram program, int bufferIndex, CGbuffer buffer);
+CG_API void CGENTRY cgSetUniformBufferParameter(CGparameter param, CGbuffer buffer);
 CG_API void * CGENTRY cgMapBuffer(CGbuffer buffer, CGbufferaccess access);
 CG_API void CGENTRY cgUnmapBuffer(CGbuffer buffer);
 CG_API void CGENTRY cgDestroyBuffer(CGbuffer buffer);
 CG_API CGbuffer CGENTRY cgGetProgramBuffer(CGprogram program, int bufferIndex);
+CG_API CGbuffer CGENTRY cgGetUniformBufferParameter(CGparameter param);
 CG_API int CGENTRY cgGetBufferSize(CGbuffer buffer);
 CG_API int CGENTRY cgGetProgramBufferMaxSize(CGprofile profile);
 CG_API int CGENTRY cgGetProgramBufferMaxIndex(CGprofile profile);
