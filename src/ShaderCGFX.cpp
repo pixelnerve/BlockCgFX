@@ -188,6 +188,11 @@ namespace V
 			_name = filename;
 
 			std::string path = filename;
+
+			std::stringstream ssname;
+			ssname << "+++ Loading effect filename: " << filename << std::endl;
+			DEBUG_MESSAGE( ssname.str().c_str() );
+
 /*
 #if defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
 			char AppAbsPath[1024];
@@ -214,7 +219,7 @@ namespace V
 			// Validate
     		CGbool isValidated = cgValidateTechnique( mObj->_currTechnique );
 			//OutputDebugStringA( cgGetTechniqueName( mObj->_currTechnique ) );
-			checkForCgError( context, "validate technique" );
+			//checkForCgError( context, "validate technique" );
 			if( isValidated == CG_TRUE ) 
 				result = true;
 			else
@@ -639,7 +644,7 @@ namespace V
 		cgSetParameterSettingMode( mContext, CG_DEFERRED_PARAMETER_SETTING );
 		cgGLSetManageTextureParameters( mContext, true );
 		checkForCgError( mContext, "manage texture parameters" );
-
+/*
 		CGprofile profile;
 		int nProfiles = cgGetNumSupportedProfiles();
 		std::stringstream ss;
@@ -652,13 +657,6 @@ namespace V
 			profile = cgGetSupportedProfile( i );
 			if( cgGetProfileProperty(profile, CG_IS_OPENGL_PROFILE) ) 
 			{
-				std::stringstream ss1;
-				ss1 << "    - " << cgGetProfileString(profile) << std::endl;
-				DEBUG_MESSAGE( ss1.str().c_str() );
-			}
-/*
-			if( cgGetProfileProperty(profile, CG_IS_OPENGL_PROFILE) ) 
-			{
 				ss1 << cgGetProfileString(profile) << " is an OpenGL profile\n" << std::endl;
 				DEBUG_MESSAGE( ss1.str().c_str() );
 			} 
@@ -667,8 +665,8 @@ namespace V
 				ss1 << cgGetProfileString(profile) << " is not an OpenGL profile\n" << std::endl;
 				DEBUG_MESSAGE( ss1.str().c_str() );
 			}
-*/
 		}
+*/
 
 		mFXCount = 0;
 	}
